@@ -1,0 +1,39 @@
+{
+  "name": "wxt-solid-starter",
+  "description": "manifest.json description",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "compile": "tsc --noEmit",
+    "browser": "agent-browser --session discord-translate",
+    "browser:install": "agent-browser install",
+    "browser:open": "npm run build && npm run browser -- --extension .output/chrome-mv3 open chrome://extensions",
+    "postinstall": "wxt prepare"
+  },
+  "dependencies": {
+    "solid-js": "^1.9.11"
+  },
+  "overrides": {
+    "addons-linter": {
+      "image-size": "2.0.4"
+    }
+  },
+  "devDependencies": {
+    "agent-browser": "0.38.1",
+    "@wxt-dev/module-solid": "^1.1.4",
+    "typescript": "^5.9.3",
+    "vite": "^8.1.5",
+    "web-ext": "^10.5.0",
+    "wxt": "^0.21.3"
+  }
+}
