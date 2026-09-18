@@ -1,0 +1,24 @@
+@import './tokens.css';
+@import './controls.css';
+
+:host { color-scheme: light; }
+* { box-sizing: border-box; }
+.dt-translate-button { display: inline-flex; align-items: center; gap: 6px; min-height: var(--dt-inline-height); padding: 4px 8px; box-shadow: var(--dt-shadow-inline); vertical-align: middle; white-space: nowrap; }
+.dt-translate-button[data-state='loading'] { background: var(--dt-loading-bg); }
+.dt-translate-button[data-state='success'] { background: var(--dt-success-bg); }
+.dt-translate-button[data-state='error'] { background: var(--dt-error-bg); }
+.dt-result-root { font: 400 var(--dt-type-body)/var(--dt-leading-body) var(--dt-font-body); color: var(--dt-text); }
+.dt-result { margin-top: 8px; border: var(--dt-border-control); padding: 8px 12px; width: fit-content; max-width: min(100%, 72ch); background: var(--dt-surface); overflow-wrap: anywhere; }
+.dt-result p { margin: 0; }
+.dt-result[data-state='loading'] { background: var(--dt-loading-bg); }
+.dt-result[data-state='error'] { background: var(--dt-error-bg); }
+.dt-result[data-state='success'] { display: flex; align-items: baseline; gap: var(--dt-space-2); margin-top: var(--dt-space-1); padding: 0; border: 0; background: transparent; color: var(--text-default); }
+.dt-language { flex: none; white-space: nowrap; color: var(--text-muted); font-size: var(--dt-type-caption); line-height: var(--dt-leading-caption); text-decoration: none; }
+.dt-translated-text { min-width: 0; white-space: pre-wrap; font-size: var(--dt-type-body); line-height: var(--dt-leading-body); }
+.dt-loading { display: flex; align-items: center; gap: 8px; }
+.dt-spinner { display: inline-block; width: var(--dt-icon-size); height: var(--dt-icon-size); border: 2px solid var(--dt-ink); border-right-color: transparent; border-radius: 50%; flex: 0 0 var(--dt-icon-size); animation: dt-spin 800ms linear infinite; }
+.dt-error-actions { display: flex; align-items: start; gap: 16px; margin-top: 4px; }
+.dt-details { font-size: var(--dt-type-caption); line-height: var(--dt-leading-caption); min-width: 0; }
+.dt-details summary { cursor: pointer; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; }
+@keyframes dt-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .dt-spinner { animation: none; } }

@@ -2,10 +2,10 @@
 
 ## Project Structure & Module Organization
 
-This repository is a WXT browser extension using SolidJS and TypeScript. It currently contains starter UI, not Discord translation functionality.
+This repository is a WXT browser extension using SolidJS and TypeScript. It implements manual and optional automatic Discord message translation through OpenRouter; track outstanding live verification in the active OpenSpec change.
 
 - `entrypoints/background.ts`: extension background logic.
-- `entrypoints/content.ts`: content script, currently matching Google pages.
+- `entrypoints/content.ts`: Discord message discovery and inline translation UI.
 - `entrypoints/popup/`: Solid components, HTML entry, and styles.
 - `assets/`: bundled assets; `public/`: files copied into the extension.
 - `wxt.config.ts`: WXT configuration; `openspec/`: specifications and change artifacts.
@@ -22,8 +22,8 @@ Use Node.js 24+ and npm; `.nvmrc` selects Node 24.
 - `npm run compile`: check TypeScript without emitting files.
 - `npm run build` / `npm run build:firefox`: build browser-specific extensions.
 - `npm run zip`: package the Chrome extension.
-- `npm run browser:install`: download Chrome for Testing once.
-- `npm run browser:open`: build and load the extension through agent-browser.
+- `npm run test`: run Vitest/jsdom tests, including content-script integration.
+- `npm run browser:*`: legacy agent-browser helpers; not the default verification workflow.
 
 ## Coding Style & Naming Conventions
 
@@ -31,13 +31,17 @@ Follow existing two-space indentation, single-quoted TypeScript strings, semicol
 
 ## Testing & Browser Automation
 
-No automated test framework, test naming convention, or coverage threshold is established. Run type checking and the relevant browser build, then verify affected popup, background, or content-script behavior.
+Use Vitest/jsdom for focused tests and run type checking plus the relevant browser build. Verify affected popup, background, and content-script behavior in the browser; local fixtures do not replace real Discord/OpenRouter verification.
 
-Read `.agents/skills/agent-browser/SKILL.md`, then run `npm run browser -- skills get core`. Use `npm run browser -- snapshot -i`, interact with current references, and snapshot again after changes. Follow README instructions to open the real extension popup. Store screenshots under ignored `.artifacts/`; close the project session with `npm run browser -- close` before rebuilding or finishing.
+Browser verification defaults to **ego lite**, controlled through `ego-browser`. Read `.agents/skills/ego-browser/SKILL.md` before using it. Do not launch agent-browser/Chrome for Testing or switch browser tools unless the user explicitly requests it.
+
+Use one Ego TaskSpace per goal and resume its numeric ID across rounds. Observe with snapshots, act on current references, then verify the result; inspect the real extension popup as well as the settings tab. After rebuilding, reload the extension and Discord page before testing. Store screenshots and verification notes under ignored `.artifacts/`.
+
+When the user takes control or a browser-owned prompt requires their action, hand off the same TaskSpace and wait. On successful completion call `task.finish({ keep: [] })`; retain only pages needed by the user. Do not close user-owned tabs or clear login state as cleanup.
 
 ## Commit & Pull Request Guidelines
 
-This checkout has no Git metadata, so existing commit conventions cannot be verified. Prefer focused imperative subjects, optionally using `feat:`, `fix:`, or `docs:`. PRs should explain behavior changes, link relevant issues/specifications, list validation commands/results, and include screenshots for UI changes.
+Prefer focused imperative subjects, optionally using `feat:`, `fix:`, or `docs:`. PRs should explain behavior changes, link relevant issues/specifications, list validation commands/results, and include screenshots for UI changes.
 
 ## Agent & Configuration Instructions
 
