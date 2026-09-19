@@ -4,6 +4,8 @@
 :host { color-scheme: light; }
 * { box-sizing: border-box; }
 .dt-translate-button { display: inline-flex; align-items: center; gap: 6px; min-height: var(--dt-inline-height); padding: 4px 8px; box-shadow: var(--dt-shadow-inline); vertical-align: middle; white-space: nowrap; }
+.dt-action-icon { display: block; width: var(--dt-icon-size); height: var(--dt-icon-size); flex: 0 0 var(--dt-icon-size); }
+.dt-translate-button[aria-expanded='true'] .dt-menu-chevron { transform: rotate(180deg); }
 .dt-translate-button[data-state='loading'] { background: var(--dt-loading-bg); }
 .dt-translate-button[data-state='success'] { background: var(--dt-success-bg); }
 .dt-translate-button[data-state='error'] { background: var(--dt-error-bg); }
@@ -20,5 +22,12 @@
 .dt-error-actions { display: flex; align-items: start; gap: 16px; margin-top: 4px; }
 .dt-details { font-size: var(--dt-type-caption); line-height: var(--dt-leading-caption); min-width: 0; }
 .dt-details summary { cursor: pointer; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; }
+.dt-translation-menu { position: fixed; margin: 0; padding: 8px; width: 224px; max-width: calc(100vw - 16px); color: var(--dt-text); background: var(--dt-surface); border: var(--dt-border-control); box-shadow: var(--dt-shadow-inline); font: 400 var(--dt-type-caption)/var(--dt-leading-caption) var(--dt-font-body); }
+.dt-translation-menu p { margin: 8px 4px 0; }
+.dt-menu-item { width: 100%; padding: 8px; text-align: left; color: var(--dt-text); background: var(--dt-yellow); border: 0; font: 700 var(--dt-type-label)/var(--dt-leading-label) var(--dt-font-body); cursor: pointer; }
+.dt-menu-item:focus-visible { outline: 3px solid var(--dt-focus); outline-offset: 2px; }
+.dt-persistence-warning { margin-top: 4px; width: fit-content; max-width: 100%; padding: 4px 8px; border: var(--dt-border-control); background: var(--dt-error-bg); color: var(--dt-text); font: 400 var(--dt-type-caption)/var(--dt-leading-caption) var(--dt-font-body); overflow-wrap: anywhere; }
+.dt-persistence-warning p { margin: 0; }
+.dt-persistence-warning summary { cursor: pointer; }
 @keyframes dt-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .dt-spinner { animation: none; } }

@@ -25,10 +25,14 @@ const resultText = () => document.querySelector('dt-translate-result')!.shadowRo
 const waitForButton = () => vi.waitFor(() => expect(document.querySelector('dt-translate-action')?.shadowRoot?.querySelector('button')).toBeTruthy());
 const complete = (text = '验收用响应', index = 0) => {
   const { request, resolve } = pending[index]!;
-  resolve({ ok: true, requestId: request.requestId, data: { requestId: request.requestId, settingsRevision: request.settingsRevision, targetLanguage: 'zh-CN', model: settings.model, translatedText: text } });
+  resolve({ ok: true, requestId: request.requestId, data: { requestId: request.requestId, settingsRevision: request.settingsRevision, targetLanguage: 'zh-CN', model: settings.model, translatedText: text, origin: 'model', entryId: 'a'.repeat(64), persistence: { status: 'saved' } } });
 };
 
 beforeEach(async () => {
+  // Only replace the top-layer methods absent in jsdom. Rendering and actions
+  // still exercise the production component and message lifecycle.
+  Object.defineProperty(HTMLElement.prototype, 'showPopover', { configurable: true, value() { this.setAttribute('data-test-popover-open', ''); } });
+  Object.defineProperty(HTMLElement.prototype, 'hidePopover', { configurable: true, value() { this.removeAttribute('data-test-popover-open'); } });
   settings = { ...initialSettings };
   pending = [];
   const cleanup: (() => void)[] = [];
@@ -42,6 +46,7 @@ beforeEach(async () => {
   runtime.sendMessage.mockImplementation(async (request) => {
     if (request.type === 'settings.getPublic') return { ok: true, data: settings };
     if (request.type === 'settings.open') return { ok: true, data: null };
+    if (!settings.hasApiKey) return { ok: false, requestId: request.requestId, error: { kind: 'missing_configuration', message: '请先填写 OpenRouter API Key 和模型 ID。' } };
     return new Promise<TranslationReply>((resolve) => pending.push({ request, resolve }));
   });
   vi.stubGlobal('location', new URL(`https://discord.com/channels/7/${channelId}`));
@@ -76,6 +81,7 @@ describe('production content UI integration', () => {
     if (!automatic) action().click();
     await vi.waitFor(() => expect(pending).toHaveLength(automatic ? 2 : 1));
     expect(pending.at(-1)!.request).toMatchObject({ channelId: nextChannel, messageId: nextMessage, sourceText: 'New channel body' });
+    expect(pending.at(-1)!.request.source.url).toBe(newUrl.href);
     if (automatic) {
       complete('旧频道译文', 0);
       await Promise.resolve();
@@ -172,6 +178,26 @@ describe('production content UI integration', () => {
     expect(action().textContent).toContain('已翻译');
     expect(pending).toHaveLength(1);
     expect(document.querySelectorAll('dt-translate-action')).toHaveLength(1);
+  });
+  it('opens a regeneration menu without a request, handles Escape, and retains the old result on failure', async () => {
+    action().click(); await vi.waitFor(() => expect(pending).toHaveLength(1)); complete('old');
+    await vi.waitFor(() => expect(action().textContent).toContain('已翻译'));
+    action().click();
+    const menu = document.querySelector('dt-translate-action')!.shadowRoot!.querySelector<HTMLElement>('[role="menu"]')!;
+    expect(action().getAttribute('aria-expanded')).toBe('true');
+    expect(pending).toHaveLength(1);
+    menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, composed: true }));
+    expect(action().getAttribute('aria-expanded')).toBe('false');
+    expect(document.querySelector('dt-translate-action')!.shadowRoot!.activeElement).toBe(action());
+    action().click(); menu.querySelector<HTMLButtonElement>('[role="menuitem"]')!.click();
+    await vi.waitFor(() => expect(pending).toHaveLength(2));
+    expect(pending[1]!.request.forceRefresh).toBe(true);
+    expect(resultText()).toContain('old');
+    expect(action().textContent).toContain('重新翻译中');
+    pending[1]!.resolve({ ok: false, requestId: pending[1]!.request.requestId, error: { kind: 'authentication', message: 'invalid key' } });
+    await vi.waitFor(() => expect(resultText()).toContain('重新翻译失败'));
+    expect(resultText()).toContain('old');
+    expect(action().getAttribute('aria-disabled')).toBe('false');
   });
   it('checks current DOM before a reply can beat the observer frame', async () => {
     action().click();

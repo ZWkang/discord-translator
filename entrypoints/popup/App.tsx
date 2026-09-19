@@ -69,6 +69,10 @@ export default function App() {
     } catch (error) { showError(error); }
     finally { setBusy(false); }
   };
+  const openHistory = async () => {
+    try { await rpc<void>({ type: 'history.open' }); }
+    catch (error) { showError(error); }
+  };
   return (
     <main class="dt-settings">
       <header class="dt-heading">
@@ -117,7 +121,8 @@ export default function App() {
         <Show when={feedback()}>{(value) => <p class="dt-feedback" classList={{ 'dt-feedback-error': value().error }}>{value().message}</p>}</Show>
       </div>
       <button class="dt-link-button dt-clear" type="button" disabled={busy() || !savedKey()} onClick={clearKey}>清除 API Key</button>
-      <footer class="dt-privacy"><strong>{autoTranslate() ? '自动翻译已开启，可随时关闭。' : '手动模式只翻译你点选的消息。'}</strong><p>翻译时，消息的可见文本会发送给 OpenRouter 及模型提供方，调用可能产生费用。密钥仅保存在此浏览器。</p></footer>
+      <button class="dt-link-button dt-history-open" type="button" onClick={() => void openHistory()}>翻译记录 ↗</button>
+      <footer class="dt-privacy"><strong>{autoTranslate() ? '自动翻译已开启，可随时关闭。' : '手动模式只翻译你点选的消息。'}</strong><p>普通翻译优先复用本地记录。未命中或选择「重新翻译」时，消息正文会发送给 OpenRouter 及模型提供方，可能产生费用。</p><p>原文、译文和消息来源仅保存在此浏览器，可在翻译记录页查看和删除。清除密钥不会清空记录，也不会主动抓取频道历史。</p></footer>
     </main>
   );
 }

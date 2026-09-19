@@ -2,11 +2,13 @@
 
 ## Project Structure & Module Organization
 
-This repository is a WXT browser extension using SolidJS and TypeScript. It implements manual and optional automatic Discord message translation through OpenRouter; track outstanding live verification in the active OpenSpec change.
+This repository is a WXT browser extension using SolidJS and TypeScript. It implements manual and optional automatic Discord message translation through OpenRouter, persistent local translation records, reuse and explicit regeneration; track outstanding live verification in the active OpenSpec change.
 
 - `entrypoints/background.ts`: extension background logic.
 - `entrypoints/content.ts`: Discord message discovery and inline translation UI.
 - `entrypoints/popup/`: Solid components, HTML entry, and styles.
+- `entrypoints/history/`: translation record browser; explicitly an unlisted WXT page, never a browser history override.
+- `lib/translation-memory.ts`: extension IndexedDB transactions and queries; `lib/translation-service.ts`: record reuse and generation coordination.
 - `assets/`: bundled assets; `public/`: files copied into the extension.
 - `wxt.config.ts`: WXT configuration; `openspec/`: specifications and change artifacts.
 - `.agents/skills/`: project skills, with corresponding Claude Code entries.

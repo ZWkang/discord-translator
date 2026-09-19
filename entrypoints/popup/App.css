@@ -31,5 +31,6 @@
 .dt-feedback { font-size: var(--dt-type-caption); line-height: var(--dt-leading-caption); padding: 8px; background: var(--dt-success-bg); border: var(--dt-border-control); }
 .dt-feedback-error { background: var(--dt-error-bg); }
 .dt-clear { margin: var(--dt-space-2) 0 var(--dt-space-4); }
+.dt-history-open { margin-left: var(--dt-space-4); }
 .dt-privacy { border-top: var(--dt-border-control); padding-top: var(--dt-space-3); font-size: var(--dt-type-caption); line-height: var(--dt-leading-caption); }
 .dt-privacy p { margin-top: var(--dt-space-1); color: var(--dt-text-muted); }

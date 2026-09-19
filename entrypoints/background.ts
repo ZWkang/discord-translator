@@ -3,10 +3,13 @@ import { createBackgroundService, senderRole } from '@/lib/background-service';
 import { createSettingsRepository } from '@/lib/settings';
 import { translateText } from '@/lib/openrouter';
 import { AppError, publicSettings, type PublicSettings } from '@/lib/messages';
+import { createTranslationMemory } from '@/lib/translation-memory';
 
 export default defineBackground(() => {
   const settings = createSettingsRepository(browser.storage.local);
   const popupUrl = browser.runtime.getURL('/popup.html');
+  const historyUrl = browser.runtime.getURL('/history.html');
+  const memory = createTranslationMemory();
   const subscribers = new Set<ReturnType<typeof browser.runtime.connect>>();
   const ready = browser.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' });
   void ready.catch(() => console.error('[Discord Translator] 无法限制本地密钥存储的访问权限。'));
@@ -14,9 +17,10 @@ export default defineBackground(() => {
     for (const port of subscribers) port.postMessage({ type: 'settings.changed', settings: value });
   };
   const handle = createBackgroundService({
-    extensionId: browser.runtime.id, popupUrl, ready: () => ready, settings,
+    extensionId: browser.runtime.id, popupUrl, historyUrl, ready: () => ready, settings, memory,
     translate: translateText, changed,
     openSettings: async () => { await browser.tabs.create({ url: popupUrl }); },
+    openHistory: async () => { await browser.tabs.create({ url: historyUrl }); },
   });
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     void handle(message, sender).then(sendResponse);
@@ -24,7 +28,7 @@ export default defineBackground(() => {
   });
   browser.runtime.onConnect.addListener((port) => {
     try {
-      if (port.name !== 'dt-settings' || !port.sender || senderRole(port.sender, browser.runtime.id, popupUrl) !== 'discord') {
+      if (port.name !== 'dt-settings' || !port.sender || senderRole(port.sender, browser.runtime.id, popupUrl, historyUrl) !== 'discord') {
         port.disconnect(); return;
       }
     } catch { port.disconnect(); return; }

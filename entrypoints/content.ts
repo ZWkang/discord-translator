@@ -16,6 +16,7 @@ export default defineContentScript({
   main(ctx) {
     const store = new TranslationState({
       settings: () => rpc<PublicSettings>({ type: 'settings.getPublic' }),
+      source: () => ({ url: currentUrl, pageTitle: document.title }),
       translate: async (request) => {
         try {
           const reply: TranslationReply = await browser.runtime.sendMessage(request);
@@ -38,6 +39,7 @@ export default defineContentScript({
     const mounted = new Map<string, Mounted>();
     let stopObserver: (() => void) | undefined;
     let currentChannel: string | null = null;
+    let currentUrl = location.href;
     let port: ReturnType<typeof browser.runtime.connect> | undefined;
     let stopped = false;
     const autoTranslate = (message: DiscordMessage) => {
@@ -74,10 +76,10 @@ export default defineContentScript({
           onMount: (container) => {
             return render(() => createComponent(TranslationAction, {
               state: messageAccessor(store, message.messageId),
-              translate: () => {
+              translate: (forceRefresh = false) => {
                 const latest = readMessage(message.row, message.channelId);
                 if (!latest || !latest.sourceText) return;
-                void store.translate(latest.messageId, latest.sourceText);
+                void store.translate(latest.messageId, latest.sourceText, false, forceRefresh);
               },
             }), container);
           },
@@ -107,6 +109,7 @@ export default defineContentScript({
       }
     };
     const navigate = (url: string) => {
+      currentUrl = url;
       const channelId = channelFromUrl(url);
       if (channelId === currentChannel) return;
       stopObserver?.();

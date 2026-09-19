@@ -1,3 +1,5 @@
+import { parseDiscordChannel } from './discord-route';
+
 export const messageListSelector = 'main ol[data-list-id="chat-messages"]';
 export const messageSelector = 'li[id^="chat-messages-"]';
 export const ownHostSelector = 'dt-translate-action, dt-translate-result';
@@ -5,8 +7,7 @@ const excludedSelector = `${ownHostSelector}, [data-et-buttonswrapper], [data-et
 const blockTags = new Set(['DIV', 'P', 'PRE', 'BLOCKQUOTE', 'LI', 'UL', 'OL']);
 
 export function channelFromUrl(url: string): string | null {
-  const parsed = new URL(url);
-  return parsed.origin === 'https://discord.com' ? /^\/channels\/\d+\/(\d+)(?:\/\d+)?\/?$/.exec(parsed.pathname)?.[1] ?? null : null;
+  return parseDiscordChannel(url)?.channelId ?? null;
 }
 export function extractSourceText(body: HTMLElement): string {
   function walk(node: Node): string {

@@ -2,6 +2,14 @@ import { defineConfig } from 'wxt';
 
 export default defineConfig({
   modules: ['@wxt-dev/module-solid'],
+  hooks: {
+    'entrypoints:found': (_wxt, entrypoints) => {
+      // "history" is reserved by WXT; this record viewer is an unlisted page.
+      for (const entrypoint of entrypoints) {
+        if (entrypoint.name === 'history') entrypoint.type = 'unlisted-page';
+      }
+    },
+  },
   manifest: {
     name: 'Discord Translator',
     description: '通过 OpenRouter 手动或自动翻译 Discord 消息，在原文下方阅读译文。',

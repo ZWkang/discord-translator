@@ -1,5 +1,7 @@
 import { AppError, isRecord, languages, type Settings, type TranslationError } from './messages';
 export const openRouterUrl = 'https://openrouter.ai/api/v1/chat/completions';
+// Increment when the translation instruction or output-affecting parameters change.
+export const translationPromptVersion = 1;
 // Debug-first: expose the selected provider's failure, without backup routes.
 export const allowProviderFallbacks = false;
 function providerError(status: number, code?: number, requestId?: string, providerMessage?: string): TranslationError {
