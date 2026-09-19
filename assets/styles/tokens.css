@@ -41,14 +41,17 @@
   --dt-space-7: 28px;
   --dt-space-8: 32px;
   --dt-border-control: 2px solid var(--dt-ink);
+  --dt-border-compact: 1px solid var(--dt-ink);
   --dt-border-frame: 3px solid var(--dt-ink);
   --dt-radius: 0;
   --dt-shadow-control: 4px 4px 0 var(--dt-ink);
   --dt-shadow-inline: 2px 2px 0 var(--dt-ink);
+  --dt-shadow-compact: 1px 1px 0 var(--dt-ink);
   --dt-shadow-panel: 6px 6px 0 var(--dt-ink);
   --dt-popup-width: 400px;
   --dt-control-height: 44px;
-  --dt-inline-height: 32px;
+  --dt-inline-height: 24px;
+  --dt-inline-icon-size: 12px;
   --dt-icon-size: 16px;
   --dt-motion-fast: 120ms;
   --dt-motion-ease: ease-out;

@@ -24,7 +24,7 @@
 
 成功结果的状态按钮 SHALL 提供可通过鼠标及键盘打开的操作菜单，菜单内明确标为「重新翻译」，并说明该操作会重新调用模型。打开菜单 MUST NOT 本身触发请求。正常状态下 MUST NOT 为重译常驻新增一行操作或卡片。重译期间 SHALL 保留原译文，显示「重新翻译中…」及忙碌语义；完成或取消菜单时焦点应有明确返回位置。
 
-成功标记和菜单箭头 SHALL 使用统一线稿 SVG，复用 `--dt-icon-size` 的 16px 尺寸、继承按钮颜色并垂直居中，不用字体字符充当图标。菜单箭头 SHALL 在关闭时朝下、展开时朝上；装饰图标 SHALL 对辅助技术隐藏，按钮通过 `aria-haspopup` 和 `aria-expanded` 表达菜单状态。
+消息旁的操作按钮 SHALL 使用 24px 最小高度、12px/18px 字号与行高、2px 6px 内边距、4px 图文间距，以及 1px 边框和硬阴影，各状态保持紧凑且文字完整可读。成功标记和菜单箭头 SHALL 使用统一线稿 SVG，复用 `--dt-inline-icon-size` 的 12px 尺寸、继承按钮颜色并垂直居中，不用字体字符充当图标。菜单箭头 SHALL 在关闭时朝下、展开时朝上；装饰图标 SHALL 对辅助技术隐藏，按钮通过 `aria-haspopup` 和 `aria-expanded` 表达菜单状态。
 
 #### Scenario: Open the regeneration menu
 - **WHEN** 用户点击或通过键盘打开已翻译消息的操作菜单

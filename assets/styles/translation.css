@@ -3,7 +3,7 @@
 
 :host { color-scheme: light; }
 * { box-sizing: border-box; }
-.dt-translate-button { display: inline-flex; align-items: center; gap: 6px; min-height: var(--dt-inline-height); padding: 4px 8px; box-shadow: var(--dt-shadow-inline); vertical-align: middle; white-space: nowrap; }
+.dt-translate-button { --dt-icon-size: var(--dt-inline-icon-size); display: inline-flex; align-items: center; gap: var(--dt-space-1); min-height: var(--dt-inline-height); padding: 2px 6px; border: var(--dt-border-compact); font-size: var(--dt-type-caption); line-height: var(--dt-leading-caption); box-shadow: var(--dt-shadow-compact); vertical-align: middle; white-space: nowrap; }
 .dt-action-icon { display: block; width: var(--dt-icon-size); height: var(--dt-icon-size); flex: 0 0 var(--dt-icon-size); }
 .dt-translate-button[aria-expanded='true'] .dt-menu-chevron { transform: rotate(180deg); }
 .dt-translate-button[data-state='loading'] { background: var(--dt-loading-bg); }

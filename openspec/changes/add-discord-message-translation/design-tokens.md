@@ -55,17 +55,22 @@
 | --- | --- | --- |
 | `--dt-space-1` 至 `--dt-space-8` | `4px, 8px, 12px, 16px, 20px, 24px, 28px, 32px` | 统一 4px 基础刻度 |
 | `--dt-border-control` | `2px solid var(--dt-ink)` | 按钮、输入框、loading/错误区域；成功译文无边框 |
+| `--dt-border-compact` | `1px solid var(--dt-ink)` | 消息旁的小号翻译按钮 |
 | `--dt-border-frame` | `3px solid var(--dt-ink)` | 设置页主区域 |
 | `--dt-radius` | `0px` | 主界面直角 |
 | `--dt-shadow-control` | `4px 4px 0 var(--dt-ink)` | popup 主按钮 |
-| `--dt-shadow-inline` | `2px 2px 0 var(--dt-ink)` | 行内翻译按钮 |
+| `--dt-shadow-inline` | `2px 2px 0 var(--dt-ink)` | 菜单、设置开关和小型面板 |
+| `--dt-shadow-compact` | `1px 1px 0 var(--dt-ink)` | 消息旁的小号翻译按钮 |
 | `--dt-shadow-panel` | `6px 6px 0 var(--dt-ink)` | 设置页唯一主表单容器 |
 | `--dt-popup-width` | `400px` | 独立页可用宽度不足时缩为 100% |
 | `--dt-control-height` | `44px` | popup 字段与主按钮的最小高度 |
-| `--dt-inline-height` | `32px` | 消息翻译按钮的最小高度 |
-| `--dt-icon-size` | `16px` | 翻译、loading、成功与错误图标 |
+| `--dt-inline-height` | `24px` | 消息翻译按钮的最小高度 |
+| `--dt-inline-icon-size` | `12px` | 消息按钮内的成功、菜单与 loading 图标 |
+| `--dt-icon-size` | `16px` | 默认图标；消息按钮内局部使用 `--dt-inline-icon-size` |
 
 popup 外边距/内边距 20px，字段组间距 16px，label 到字段 8px；底部为硬阴影预留空间。正文末尾按钮与原文间距 8px；成功译文与原文垂直间距 4px，无 padding、边框、底色和阴影。语言标记与译文基线对齐，水平间距 8px；单行结果为 22px 行高。loading/错误保留独立状态底色与原有 padding。扩展 host 不使用全局浮层或超过 Discord 弹窗的 z-index。
+
+消息按钮使用 12px/18px 字号与行高、2px 6px 内边距、4px 图文间距，最小高度 24px；边框和硬阴影各 1px。各状态复用这一尺寸，避免密集消息列表被操作按钮撑高。菜单与设置页继续使用各自原有尺寸。
 
 成功译文复用 Discord 实页已有的 `--text-default`，语言标记复用 `--text-muted`，随宿主深浅主题变化；不得直接继承父级 contents 的 color，该父级在实查深色主题中为暗色，而原文通过 `--text-default` 使用浅色。popup 与状态按钮继续使用扩展自己的语义色。
 
