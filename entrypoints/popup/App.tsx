@@ -2,13 +2,17 @@ import { createSignal, onMount, Show, For } from 'solid-js';
 import { browser } from 'wxt/browser';
 import { AppError, languages, type Settings, type TargetLanguage } from '@/lib/messages';
 import { rpc } from '@/lib/rpc';
+import { modelPresets, modelPricesCheckedAt } from '@/lib/model-presets';
 import logo from '@/assets/branding/discord-translator-line-v1.png';
 import './App.css';
 
 export default function App() {
   const version = browser.runtime.getManifest().version;
   const [apiKey, setApiKey] = createSignal('');
-  const [model, setModel] = createSignal('');
+  const [modelChoice, setModelChoice] = createSignal('');
+  const [customModel, setCustomModel] = createSignal('');
+  const model = () => modelChoice() === 'custom' ? customModel() : modelChoice();
+  const selectedPreset = () => modelPresets.find(preset => preset.id === modelChoice());
   const [language, setLanguage] = createSignal<TargetLanguage>('zh-CN');
   const [autoTranslate, setAutoTranslate] = createSignal(false);
   const [visible, setVisible] = createSignal(false);
@@ -18,7 +22,9 @@ export default function App() {
   const [feedback, setFeedback] = createSignal<{ message: string; error: boolean }>();
   const applySettings = (settings: Settings) => {
     setApiKey(settings.apiKey);
-    setModel(settings.model);
+    const isPreset = modelPresets.some(preset => preset.id === settings.model);
+    setModelChoice(!settings.model || isPreset ? settings.model : 'custom');
+    setCustomModel(isPreset ? '' : settings.model);
     setLanguage(settings.targetLanguage);
     setAutoTranslate(settings.autoTranslate);
     setSavedKey(Boolean(settings.apiKey));
@@ -102,12 +108,28 @@ export default function App() {
           <Show when={attempted() && !apiKey().trim()}><p id="key-error" class="dt-field-error">请填写 API Key</p></Show>
         </div>
         <div class="dt-field">
-          <label for="model">模型 ID</label>
-          <input class="dt-input" id="model" placeholder="provider/model-name" value={model()} disabled={busy()} spellcheck={false}
-            aria-invalid={attempted() && !model().trim()} aria-describedby={attempted() && !model().trim() ? 'model-help model-error' : 'model-help'}
-            onInput={(event) => { setModel(event.currentTarget.value); setFeedback(undefined); }} />
-          <p id="model-help" class="dt-hint">填写支持文本生成的 OpenRouter 模型 ID。</p>
-          <Show when={attempted() && !model().trim()}><p id="model-error" class="dt-field-error">请填写模型 ID</p></Show>
+          <label for="model">翻译模型</label>
+          <select class="dt-input" id="model" value={modelChoice()} disabled={busy()}
+            aria-invalid={attempted() && !modelChoice()} aria-describedby={attempted() && !modelChoice() ? 'model-help model-error' : 'model-help'}
+            onChange={(event) => { setModelChoice(event.currentTarget.value); setFeedback(undefined); }}>
+            <option value="" disabled selected={!modelChoice()}>选择低价模型</option>
+            <For each={modelPresets}>{preset => <option value={preset.id} selected={modelChoice() === preset.id}>{preset.name}</option>}</For>
+            <option value="custom" selected={modelChoice() === 'custom'}>自定义模型…</option>
+          </select>
+          <div id="model-help" class="dt-hint dt-model-help">
+            <Show when={selectedPreset()} fallback={<p>{modelChoice() === 'custom' ? '填写支持文本生成的完整 OpenRouter 模型 ID。' : '选择候选查看参考价格，保存后生效。'}</p>}>{preset => <>
+              <p class="dt-model-price"><span>输入 ${preset().inputPrice}</span><span>输出 ${preset().outputPrice}</span><span>/ 百万 token</span></p>
+              <p>参考价 · {modelPricesCheckedAt} · <a href={`https://openrouter.ai/${preset().id}`} target="_blank" rel="noreferrer">官方价格 ↗</a></p>
+              <p>实际费用以提供方计费为准。</p>
+            </>}</Show>
+          </div>
+          <Show when={modelChoice() === 'custom'}>
+            <label for="custom-model">自定义模型 ID</label>
+            <input class="dt-input" id="custom-model" placeholder="provider/model-name" value={customModel()} disabled={busy()} spellcheck={false}
+              aria-invalid={attempted() && !customModel().trim()} aria-describedby={attempted() && !customModel().trim() ? 'model-help model-error' : 'model-help'}
+              onInput={(event) => { setCustomModel(event.currentTarget.value); setFeedback(undefined); }} />
+          </Show>
+          <Show when={attempted() && !model().trim()}><p id="model-error" class="dt-field-error">{modelChoice() === 'custom' ? '请填写模型 ID' : '请选择翻译模型'}</p></Show>
         </div>
         <div class="dt-field">
           <label for="language">翻译成</label>

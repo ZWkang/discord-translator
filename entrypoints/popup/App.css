@@ -24,6 +24,11 @@
 .dt-key-row { display: flex; min-width: 0; gap: 8px; }
 .dt-reveal { box-shadow: none; background: var(--dt-bg); padding: 6px; flex: 0 0 44px; }
 .dt-hint { font-size: var(--dt-type-caption); line-height: var(--dt-leading-caption); color: var(--dt-text-muted); }
+.dt-model-help { overflow-wrap: anywhere; }
+.dt-model-price { display: flex; flex-wrap: wrap; column-gap: 8px; }
+.dt-model-price span { white-space: nowrap; }
+.dt-model-help a { color: inherit; text-underline-offset: 2px; }
+.dt-model-help a:focus-visible { outline: 3px solid var(--dt-focus); outline-offset: 2px; }
 .dt-field-error { font-size: var(--dt-type-caption); background: var(--dt-error-bg); padding: 4px 8px; border-left: 2px solid var(--dt-ink); }
 .dt-save { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
 .dt-save span { font-size: 18px; }

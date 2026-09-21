@@ -124,8 +124,10 @@ describe('history page with real repository and background RPC', () => {
   it('opens history from an incomplete settings form without saving it', async () => {
     caller = 'popup';
     dispose = render(() => createComponent(Popup, {}), root);
-    await vi.waitFor(() => expect(root.querySelector<HTMLInputElement>('#model')?.disabled).toBe(false));
-    const model = root.querySelector<HTMLInputElement>('#model')!;
+    await vi.waitFor(() => expect(root.querySelector<HTMLSelectElement>('#model')?.disabled).toBe(false));
+    const choice = root.querySelector<HTMLSelectElement>('#model')!;
+    choice.value = 'custom'; choice.dispatchEvent(new Event('change', { bubbles: true }));
+    const model = root.querySelector<HTMLInputElement>('#custom-model')!;
     model.value = 'unsaved/model'; model.dispatchEvent(new Event('input', { bubbles: true }));
     root.querySelector<HTMLButtonElement>('.dt-history-open')!.click();
     await vi.waitFor(() => expect(openHistory).toHaveBeenCalledOnce());
