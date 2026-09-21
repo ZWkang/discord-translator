@@ -1,84 +1,183 @@
-# Discord Translator
+<p align="center">
+  <img src="assets/branding/discord-translator-line-v1.png" width="88" alt="Discord Translator 标志" />
+</p>
 
-基于 WXT、SolidJS 和 TypeScript 的 Chrome 扩展。在 Discord 网页版文字频道手动或自动翻译消息，将译文保存在本地；相同内容优先复用记录，未命中时通过 OpenRouter 调用指定大模型，在原文下一行显示译文。
+<h1 align="center">Discord Translator</h1>
 
-## 使用
+<p align="center">在原文下方读懂 Discord。按需翻译，本地留存。</p>
 
-当前版本为 **0.2.0**，新增本地翻译记录、记录管理页和显式重新翻译。设置页右上角显示实际加载的版本号，可用于确认扩展是否更新。
+<p align="center">
+  <img src="https://img.shields.io/badge/version-0.2.0-ffe600?style=flat-square" alt="版本 0.2.0" />
+  <img src="https://img.shields.io/badge/Chrome-MV3-4285f4?style=flat-square" alt="Chrome Manifest V3" />
+  <img src="https://img.shields.io/badge/Node.js-24%2B-339933?style=flat-square" alt="Node.js 24 及以上" />
+  <img src="https://img.shields.io/badge/AI-OpenRouter-111111?style=flat-square" alt="通过 OpenRouter 接入模型" />
+</p>
 
-1. 使用 Node.js 24+（见 `.nvmrc`），运行 `npm ci`、`npm run build`。
-2. 在 Chrome 的 `chrome://extensions` 中开启开发者模式，加载已解压的扩展，选择本项目 `.output/chrome-mv3/`。
-3. 打开扩展设置，填写自己的 OpenRouter API Key，从「翻译模型」下拉框选择低价候选，或选「自定义模型」填写完整模型 ID；选择目标语言后点击「保存设置」。默认简体中文，也支持英文、日文、韩文。切换选项只修改草稿，保存后生效。保存不验证模型可用性；手动模式下不发起翻译，自动模式下按新配置处理已加载消息。仅支持 Chat Completions 的文本生成模型；例如 `typesafe/jev-1.13` 这类决策模型无法用于该翻译接口，错误区会提示更换模型。
-4. 刷新 Discord 网页，在普通服务器文字频道点击消息旁的「翻译」。优先查询本地记录，命中时不调用模型；未命中时显示「翻译中…」，成功后显示译文并保存。两种成功结果均显示「已翻译」，本地记录来源通过悬停提示和可访问说明展示。失败显示原因、错误详情和「重试」。
-5. 需要自动处理时，开启设置页顶部的「自动翻译」。开关默认关闭，点击即时保存；开启后处理当前已加载及新出现的文本消息，切换频道或原文更新后也会处理。关闭后停止新自动请求，已发出的请求继续完成，已有译文保留。失败消息只允许手动重试。
-6. 在 popup 点击「翻译记录」，进入独立页面。按服务器、频道、目标语言和模型筛选，搜索原文或译文，展开完整内容与来源，或跳转到 Discord 原消息。记录按首次生成时间排列，较早记录可继续加载；新记录在刷新后显示。
-7. 对译文不满意时，打开消息「已翻译」按钮的菜单，选择「重新翻译」。按钮右侧的线稿箭头表示菜单入口，展开时朝上。该操作绕过缓存并调用当前模型，等待时保留旧译文；新结果生成且保存成功才替换。失败保留旧记录并显示原因，保存失败的新文本可以作为未保存候选查看。
+基于 WXT、SolidJS 和 TypeScript 的浏览器扩展。在 Discord 网页版文字频道里，点击消息即可阅读译文，也可以开启自动翻译。使用你自己的 OpenRouter API Key，选择模型；翻译记录保存在本地，相同内容优先复用。
 
-设置弹窗的内容宽度为 400px；从消息中的「打开设置」可进入独立设置标签页。独立页可适应 320px 宽度。成功译文使用紧凑文本行，不显示卡片边框或底色；语言标记为「简中 / EN / 日 / 韩」，悬停显示完整名称。原始消息保持可读，不发送 Discord 发言，不主动抓取未加载的频道历史。
+[功能](#功能) · [界面预览](#界面预览) · [安装](#安装) · [使用](#使用) · [常见问题](#常见问题) · [开发](#开发) · [自动化与发布](#自动化与发布) · [贡献](#贡献) · [许可证](#许可证)
 
-移动或重命名项目文件夹后，浏览器中的扩展仍指向原加载路径，可能导致样式文件读取失败。重新构建后，在扩展管理页通过「加载已解压的扩展」选择新目录 `discord-translator/.output/chrome-mv3/`，再刷新 Discord；仅点击旧扩展的「重新加载」不会更新目录。
+![Discord 真实频道中的行内翻译，原文下方紧跟中文译文](assets/screenshots/inline-translation.png)
 
-## 数据和失败行为
+## 功能
 
-模型候选包括 Qwen2.5 7B Instruct、Qwen3 30B A3B Instruct 2507、Ministral 3 3B 和 Gemini 2.5 Flash-Lite。下拉框展示所选模型的输入/输出参考价格（美元/百万 token）、核对日期和官方链接；价格快照来自 [OpenRouter 模型目录](https://openrouter.ai/api/v1/models)，核对于 2026-09-20，不在打开 popup 时联网刷新，实际费用以提供方计费为准。已有模型会原样回显，列表外的 ID 显示为自定义，不自动替换。
+| 功能 | 当前能力 |
+| --- | --- |
+| 按需与自动翻译 | 点击单条消息翻译；自动模式处理已加载及新出现的消息，可随时关闭 |
+| 低价模型选择 | 四个内置候选，展示输入/输出参考价格；支持自定义完整模型 ID |
+| 多语言 | 简体中文、英文、日文、韩文；默认简体中文 |
+| 本地复用 | 原文、模型、目标语言等参数一致时复用记录，避免重复模型调用 |
+| 翻译记录 | 搜索原文/译文，按服务器、频道、语言、模型筛选，查看完整内容与消息来源 |
+| 显式重新翻译 | 从「已翻译」菜单重新调用模型；失败保留旧译文 |
+| 记录管理 | 删除单条或清空记录，操作前确认；不修改 Discord 消息 |
 
-- API Key 保存在扩展的 `storage.local`，仅可信扩展上下文可读，不云同步。设置页默认遮蔽密钥，并提供清除操作；清除 Key 同时关闭自动翻译。本地存储不等于加密保险库。
-- 只有未命中记录或用户显式重新翻译时，才将该条消息的可见正文与翻译指令发送给 OpenRouter 及所选模型提供方。自动模式会持续处理页面已加载的消息，可能增加费用。作者资料、回复预览、附件、隐藏文本、其他翻译扩展控件与已有译文不包含在请求内。
-- 请求使用用户指定模型；不自动重试、不切换模型、不截断正文。`lib/openrouter.ts` 明确设置 `provider.allow_fallbacks: false`，暴露上游提供方失败。
-- 成功译文、原文、翻译参数、时间和 Discord 消息来源保存在扩展本地 IndexedDB，不云同步，不保存密钥或作者资料。刷新和切频道会清除页面内状态，后续处理可再次读取持久记录；同频道内滚动重挂载复用有效展示状态。
-- 复用要求原文、目标语言、模型、提供方和翻译指令版本完全一致，允许跨 Discord 频道复用，并保留各自来源。换密钥不影响兼容记录；换模型/语言或编辑原文不会误用旧译文。手动模式仍需点击触发，不自动展开历史译文。
-- 相同未命中请求共享一次生成及保存过程。记录按首次生成时间分页，复用和重译不会挪动原有位置；模型成功但保存失败会明确标记未保存，读取失败不会静默改成付费调用。
-- 清除密钥会关闭自动翻译，保留模型、目标语言和记录；此后仍可手动复用已有记录，未命中和强制重译则需要重新配置凭据。
-- 删除单条词条会同时删除它在所有频道的来源关联；「清空全部记录」作用于整个记录库，不限当前筛选。操作需要确认，失败不会假报成功。删除不会修改 Discord 消息或当前页面已经显示的译文，也不会自动重译；删除前的迟到结果不能重新写回，删除后新发起的翻译仍可生成记录。
-- 本功能从启用后的成功翻译开始积累，不补回此前仅存在页面内存的结果。来源是保存时的快照，原消息可能已编辑、删除或失去访问权限。卸载扩展、更换浏览器配置或更换扩展 ID 不会自动迁移记录。
-- 旧结果失效不保证已提交的上游请求取消或免计费。MV3 后台连接中断会显示失败，需要手动重试。
-- 译文作为纯文本显示，不执行 HTML。凭据、请求正文和 provider 原始响应不写入日志。
+当前支持 **Chrome MV3 + discord.com 普通服务器文字频道**。私信、线程/论坛、桌面 Discord、图片/OCR、附件、语音和输入翻译尚不在支持范围。Firefox 仅做构建兼容检查，尚未完成运行时与商店发布验证。
 
-## 开发与检查
+## 界面预览
+
+以下为 **v0.2.0 真实插件截图**，使用 ego lite 拍摄。API Key 保持遮蔽；聊天身份、服务器和频道标识已裁去或遮蔽。译文来自实际记录，仅展示交互效果，不代表模型质量基准。
+
+### 模型设置
+
+自动翻译开关即时保存；模型和目标语言在点击「保存设置」后生效。价格是标注日期的参考快照。
+
+<p align="center">
+  <img src="assets/screenshots/settings.png" width="400" alt="完整设置页：自动翻译、模型价格和目标语言" />
+  <img src="assets/screenshots/custom-model.png" width="400" alt="自定义模型模式：填写完整 OpenRouter 模型 ID" />
+</p>
+
+<details>
+<summary>查看工具栏原生弹窗</summary>
+
+实际 popup 可滚动，下图保留其原生 600px 视口。
+
+<img src="assets/screenshots/popup.png" width="400" alt="浏览器工具栏打开的真实扩展 popup" />
+
+</details>
+
+### 重新翻译
+
+打开菜单查看操作说明；选择「重新翻译」才会绕过已有记录并重新调用模型。
+
+![已翻译按钮展开重译菜单，显示费用提示](assets/screenshots/retranslate-menu.png)
+
+### 本地翻译记录
+
+原文与译文并排阅读，可搜索、筛选和展开来源。
+
+![翻译记录列表、搜索框和四种筛选条件](assets/screenshots/history.png)
+
+<details>
+<summary>查看完整内容与消息来源</summary>
+
+![展开的词条详情：完整原文、译文、时间和来源入口，来源身份已遮蔽](assets/screenshots/history-detail.png)
+
+</details>
+
+截图原文件与拍摄说明位于 [assets/screenshots](assets/screenshots/README.md)。
+
+## 安装
+
+### 从源码构建
+
+需要 **Node.js 24+** 和 npm；`.nvmrc` 指定 Node 24。在项目根目录运行：
 
 ```sh
 npm ci
-npm run dev             # Chrome 开发模式
-npm run compile         # TypeScript
-npm run test            # Vitest + jsdom，含真实 content/ShadowRoot/Solid 集成
-npm run build           # .output/chrome-mv3/
-npm run build:firefox    # 仅检查 Firefox 构建兼容性
-npm run zip
+npm run build
 ```
 
-V1 验收范围为 Chrome MV3 和 discord.com 普通服务器文字频道。私信、线程/论坛、桌面 Discord、OCR/附件/语音、输入翻译与自动发送不在本版范围。Firefox 尚未完成运行时验证；其构建仍提示扩展 ID 和数据收集声明缺失，不能据此宣称可上架或功能可用。
+1. 打开 `chrome://extensions`，开启「开发者模式」。
+2. 点击「加载已解压的扩展程序」，选择 `.output/chrome-mv3/`。
+3. 在工具栏固定 Discord Translator，打开插件设置。
+4. 配置 OpenRouter 后刷新 Discord 页面。
 
-`entrypoints/history/` 是普通扩展页面。WXT 将 `history` 视为保留入口名，因此 `wxt.config.ts` 用 `entrypoints:found` 将其明确设为 `unlisted-page`；构建产物应包含 `history.html` 且不含 `chrome_url_overrides`。`fake-indexeddb` 仅用于测试，生产使用浏览器 IndexedDB。
+### 使用打包文件
 
-## 浏览器验证
+仓库发布版本后，可在 GitHub **Releases** 下载 `discord-translator-<版本>-chrome.zip`，解压到固定目录，再按上面的步骤加载。CI 运行的 **Artifacts → chrome-extension** 也会提供测试通过后的安装包。首次 Release 是否存在，以仓库 Releases 页面为准。
 
-默认使用 **ego lite**，操作入口为 `ego-browser`。Agent 先阅读 `.agents/skills/ego-browser/SKILL.md`；`npm run browser:*` 仅保留为旧的 agent-browser 辅助命令，不再作为默认验证方式。
+更新时替换原目录中的文件，在扩展管理页点击「重新加载」，再刷新 Discord。若移动或重命名了加载目录，需要重新选择目录；仅重载旧扩展不会更新路径。
+
+## 使用
+
+1. **配置模型**：填写自己的 OpenRouter API Key，选择低价候选或自定义模型 ID，选择目标语言，点击「保存设置」。保存成功表示本地配置已保存，可用性在实际翻译时验证。
+2. **翻译消息**：在频道中点击「翻译」。先查询本地记录，未命中才调用模型；译文出现在原文下方。失败时查看错误原因，再手动重试。
+3. **开启自动模式**：启用设置页顶部「自动翻译」。关闭后停止发起新的自动请求，已有译文保留，已发出的请求仍可能完成并计费。
+4. **查看历史**：点击「翻译记录」，搜索或筛选，展开词条查看原文、译文与来源。新记录在刷新后显示；较早记录可以继续加载。
+5. **重新生成**：点击「已翻译」右侧箭头，再选择「重新翻译」。新结果生成且保存成功才替换旧记录。
+
+## 数据与隐私
+
+- API Key 保存在扩展本地 `storage.local`，默认遮蔽，仅可信扩展页面可读取。清除 Key 会关闭自动翻译，保留模型选择和翻译记录。
+- 未命中记录或主动重译时，消息正文与翻译指令发送给 OpenRouter 及所选模型提供方；作者资料、回复预览、附件与隐藏文本不包含在请求中。
+- 原文、译文、翻译参数和消息来源保存在本地 IndexedDB，不云同步。扩展不发送 Discord 发言，也不主动抓取未加载的频道历史。
+- 不自动重试、不自动换模型、不截断正文。请求与存储失败会明确显示。
+
+缓存匹配、删除语义、存储失败、数据生命周期详见 [数据与隐私说明](docs/data-and-privacy.md)。
+
+## 常见问题
+
+**翻译需要付费吗？**
+
+模型调用由你的 OpenRouter 账号计费；复用兼容的本地记录不会调用模型。自动模式可能增加调用量。预设价格带核对日期，实际费用以提供方计费为准。
+
+**为什么保存成功后仍然翻译失败？**
+
+保存不验证模型或余额。根据错误检查 API Key、余额、限流和模型能力。仅支持 Chat Completions 文本生成模型；`typesafe/jev-1.13` 这类决策模型不适用于当前接口。
+
+**为什么看不到翻译按钮，或提示扩展连接中断？**
+
+确认处于普通服务器文字频道。扩展更新后重新加载扩展，再刷新 Discord；其他已经打开的 Discord 标签页也需要刷新。插件设置右上角会显示实际加载版本。
+
+**换模型后会复用旧结果吗？**
+
+只有原文、目标语言、模型、提供方和翻译指令版本全部一致才复用。换 Key 不影响兼容记录；换模型、语言或编辑原文不会误用旧译文。
+
+**清除 Key、删除记录、卸载有什么区别？**
+
+清除 Key 保留记录，仍能手动复用已有译文；删除词条会删除其所有频道来源，但不改 Discord 原消息或当前已显示的译文。卸载、更换浏览器配置或扩展 ID 不会自动迁移记录。
+
+## 开发
 
 ```sh
-ego-browser nodejs <<'EOF'
-const task = await taskSpace('Discord Translator 验证');
-console.log({ spaceId: task.spaceId, page: 'p1' });
-const page = task.page('p1');
-console.log(await page.snapshot());
-EOF
+npm ci
+npm run dev             # Chrome 开发模式与 HMR
+npm run compile         # TypeScript 检查
+npm test                # Vitest / jsdom 集成测试
+npm run build           # Chrome MV3 构建
+npm run build:firefox    # Firefox 构建兼容检查
+npm run zip             # Chrome 安装包
 ```
 
-通过扩展管理页读取本项目实际 ID，再打开 `chrome-extension://EXTENSION_ID/popup.html`。验证原生 popup 时还需打开 Chrome 工具栏中的扩展，不能仅用独立标签页截图替代。
+| 目录 | 用途 |
+| --- | --- |
+| `entrypoints/popup/` | 设置、模型选择与自动翻译开关 |
+| `entrypoints/content.ts` | Discord 消息发现与行内交互 |
+| `entrypoints/background.ts` | 扩展后台入口 |
+| `entrypoints/history/` | 独立翻译记录页 |
+| `lib/` | OpenRouter、配置、IndexedDB、翻译协调 |
+| `tests/` | 单元与集成回归 |
+| `assets/` | 样式、品牌素材、宣传截图 |
+| `openspec/` | 能力规格、变更设计与验收任务 |
 
-同一验证目标只创建一个 TaskSpace，后续用输出的数字 ID 恢复。重建后先重载扩展和 Discord 页面，确保验证最新产物；其他已打开的 Discord 标签页也需刷新一次才能获得新版内容脚本。测试截图与验收记录保存在忽略目录 `.artifacts/verification/`。需要用户操作时调用 `task.handOff()`；验证完成后调用 `task.finish({ keep: [] })`，不关闭用户已有标签页、不清除登录态。不要提交 Cookie、登录状态或 API Key。
+浏览器验证使用 **ego lite / ego-browser**。实际 Discord、OpenRouter 和原生 popup 验证步骤、历史验收范围及依赖说明见 [开发与验证](docs/development.md)。自动化测试不替代真实模型联调。
 
-自动化测试在浏览器通信边界提供可控输入，验证真实解析、状态与组件代码；这些测试以及本地 UI 状态样本不代表真实 OpenRouter 调用通过。
+## 自动化与发布
 
-2026-09-18 已在 ego lite 的真实 Discord 频道完成 OpenRouter 联调：实测 `qwen/qwen-2.5-7b-instruct` 的短句与多段翻译、缺配置/无效密钥/手动重试、后台中断、设置通知，以及在途请求期间切频道和本地正文变更的旧结果隔离。0.2.0 追加验证了真实保存、零模型调用的记录复用、无密钥复用、一次模型调用的显式重译、失败保留旧译文、跨频道来源、分页、搜索和删除。存储异常通过一次性 IndexedDB 故障注入验证，模型请求仍是真实调用；观察器和注入均在结束时还原。
+- [CI](.github/workflows/ci.yml)：推送 `main`、提交 PR 或手动运行时，按 `.nvmrc` 安装 Node，执行锁文件安装、类型检查、测试、Chrome 打包及 Firefox 构建检查，上传 Chrome ZIP。
+- [Release](.github/workflows/release.yml)：推送 `v*` 标签后复用同一套检查，校验标签与 `package.json` 版本一致，再创建 GitHub Release 并附上已验证的 Chrome ZIP。使用仓库 `GITHUB_TOKEN`，仅发布 job 申请 `contents: write`。
+- [Dependabot](.github/dependabot.yml)：每周检查 npm 与 GitHub Actions 依赖更新，提交更新 PR。
 
-SPA 来源验证使用浏览器原生 `sender.tab.url` 核对当前频道；`sender.url` 在 Discord 单页导航后可能仍是最初注入的文档地址。实页发现的问题已补回归。旧版验证详见 `.artifacts/verification/report.md`，本次详见 `.artifacts/verification/history-v020-report.md`。测试替身不代替真实模型验收，译文质量仅做样本检查，不是模型质量基准。没有向 Discord 发送、编辑或删除发言。
+发布时先同步 `package.json`、`package-lock.json` 和 README 的版本，提交后推送对应 `v<版本>` 标签。流程不会自动提交到 Chrome Web Store，也不会发布 Firefox 安装包。Actions 通过只代表自动检查完成，发布前仍需真实浏览器验收。
 
-## 规划
+实现参考：[GitHub setup-node](https://github.com/actions/setup-node)、[Artifacts](https://github.com/actions/upload-artifact)、[GitHub CLI Release](https://cli.github.com/manual/gh_release_create)。
 
-当前变更为 `openspec/changes/add-discord-translation-memory/`，含本地记录、优先复用、重译及管理页规格。基础翻译与新粗野主义 design token 位于 `openspec/changes/add-discord-message-translation/`；已有能力基线已同步至 `openspec/specs/`。任务清单只勾选已完成的实现与对应验证。
+## 贡献
 
-## 依赖安全修复
+欢迎通过 GitHub Issues 反馈问题或提交 Pull Request。问题报告请附上扩展版本、浏览器版本、复现步骤、预期与实际行为，以及脱敏截图；不要附上 API Key、Cookie 或私人聊天内容。
 
-`addons-linter` 当前锁定 `image-size@2.0.2`，其 ICNS、JXL、HEIF 解析器存在畸形图片导致死循环的问题（[ICNS 公告](https://github.com/advisories/GHSA-w3rx-r6r6-pgpr)、[JXL/HEIF 公告](https://github.com/advisories/GHSA-5p2g-fcmc-qvqq)）。`package.json` 通过定向 `overrides` 将该依赖替换为已修复相关解析逻辑的 `2.0.4`，并由 `package-lock.json` 锁定。
+开发前阅读 [AGENTS.md](AGENTS.md) 和 [OpenSpec 规格](openspec/specs/)。保持改动聚焦，运行类型检查、相关测试与构建；涉及 UI 时补充真实浏览器截图和验证说明。当前变更及剩余验收项见 [OpenSpec changes](openspec/changes/)。
 
-升级 web-ext/addons-linter 后，若上游已采用修复版本，可删除该 override、重新安装，并运行 `npm audit`、类型检查、浏览器构建和 `web-ext lint` 验证。
+## 许可证
+
+仓库当前尚未指定许可证，未包含 `LICENSE` 文件。
