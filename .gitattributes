@@ -1,0 +1,10 @@
+# Exclude local verification data and credentials from git archive exports.
+.artifacts export-ignore
+.env export-ignore
+.env.* export-ignore
+.env.example -export-ignore
+.env.*.example -export-ignore
+web-ext.config.ts export-ignore
+node_modules export-ignore
+.output export-ignore
+.wxt export-ignore

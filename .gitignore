@@ -15,6 +15,12 @@ stats-*.json
 web-ext.config.ts
 .artifacts/
 
+# Local credentials; only explicitly named example files may be committed.
+.env
+.env.*
+!.env.example
+!.env.*.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
